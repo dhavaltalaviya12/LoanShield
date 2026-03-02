@@ -220,7 +220,7 @@ function generateFloatingIcons() {
     if (!floatingContainer) return;
 
     const icons = ['💰', '💳', '📊', '💵', '🏦', '📈', '💸', '🪙', '📉', '💴', '💶', '💷', '💱', '🏧', '💹', '💲'];
-    const numIcons = 100;
+    const numIcons = 200;
 
     for (let i = 0; i < numIcons; i++) {
         const iconElement = document.createElement('div');
