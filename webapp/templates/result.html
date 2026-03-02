@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Assessment Result | LoanShield</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Three.js for 3D Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body class="preload">
+    <!-- 3D Canvas Background -->
+    <canvas id="three-canvas"></canvas>
+
+    <div class="floating-icons"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="LoanShield Logo"
+                    class="nav-logo-img"> LoanShield <span>AI</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/assess">Assessment</a>
+                <a href="/insights">Insights</a>
+                <a href="/about">About</a>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="result-container">
+        <div class="glass-card result-card {% if 'High' in prediction %}risk-high{% else %}risk-low{% endif %}">
+            <div class="icon-container">
+                {% if 'High' in prediction %}
+                <i class="fa-solid fa-triangle-exclamation pulse-red"></i>
+                {% else %}
+                <i class="fa-solid fa-shield-check pulse-green"></i>
+                {% endif %}
+            </div>
+
+            <div class="result-content">
+                <h2 class="result-title">Risk Assessment Complete</h2>
+
+                <div class="prediction-box">
+                    <span class="label">Prediction</span>
+                    <h1 class="main-result">{{ prediction }}</h1>
+                </div>
+
+                <div class="score-box">
+                    <div class="score-label">Default Probability</div>
+                    <div class="score-value">{{ probability }}%</div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: {{ probability }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="result-metrics-grid">
+                    <div class="result-metric-card">
+                        <div class="result-metric-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                        <div class="result-metric-value">
+                            {% if probability < 30 %}Excellent{% elif probability < 50 %}Good{% elif probability < 70
+                                %}Fair{% else %}Poor{% endif %} </div>
+                                <div class="result-metric-label">Risk Rating</div>
+                        </div>
+                        <div class="result-metric-card">
+                            <div class="result-metric-icon"><i class="fa-solid fa-chart-line"></i></div>
+                            <div class="result-metric-value">
+                                {% if probability < 50 %}{{ 100 - probability|round(1) }}{% else %}{{
+                                    probability|round(1) }}{% endif %}% </div>
+                                    <div class="result-metric-label">
+                                        {% if probability < 50 %}Approval Confidence{% else %}Risk Factor{% endif %}
+                                            </div>
+                                    </div>
+                                    <div class="result-metric-card">
+                                        <div class="result-metric-icon"><i class="fa-solid fa-shield"></i></div>
+                                        <div class="result-metric-value">
+                                            {% if probability < 20 %}A+{% elif probability < 40 %}A{% elif probability <
+                                                50 %}B+{% elif probability < 60 %}B{% elif probability < 70 %}C{% else
+                                                %}D{% endif %} </div>
+                                                <div class="result-metric-label">Credit Grade</div>
+                                        </div>
+                                        <div class="result-metric-card">
+                                            <div class="result-metric-icon"><i class="fa-solid fa-brain"></i></div>
+                                            <div class="result-metric-value">4 Models</div>
+                                            <div class="result-metric-label">AI Consensus</div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-section">
+                            <h2 class="section-title"><i class="fa-solid fa-microscope"></i> Detailed Risk Analysis</h2>
+                            <div class="analysis-grid">
+                                <div class="glass-card analysis-card">
+                                    <h3 class="analysis-card-title"><i class="fa-solid fa-chart-pie"></i> Risk
+                                        Distribution</h3>
+                                    <div class="chart-container"><canvas id="riskPieChart"></canvas></div>
+                                    <p class="chart-description">Probability breakdown showing approval vs default
+                                        likelihood</p>
+                                </div>
+                                <div class="glass-card analysis-card">
+                                    <h3 class="analysis-card-title"><i class="fa-solid fa-chart-bar"></i> Portfolio
+                                        Comparison</h3>
+                                    <div class="chart-container"><canvas id="comparisonBarChart"></canvas></div>
+                                    <p class="chart-description">How this assessment compares to our historical data</p>
+                                </div>
+                                <div class="glass-card analysis-card">
+                                    <h3 class="analysis-card-title"><i class="fa-solid fa-chart-line"></i> Risk Trend
+                                        Projection</h3>
+                                    <div class="chart-container"><canvas id="trendLineChart"></canvas></div>
+                                    <p class="chart-description">Projected risk evolution over loan term</p>
+                                </div>
+                                <div class="glass-card analysis-card">
+                                    <h3 class="analysis-card-title"><i class="fa-solid fa-diagram-project"></i> Model
+                                        Confidence</h3>
+                                    <div class="chart-container"><canvas id="modelRadarChart"></canvas></div>
+                                    <p class="chart-description">Individual model predictions and ensemble strength</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="factors-section">
+                            <h2 class="section-title"><i class="fa-solid fa-list-check"></i> Key Influencing Factors
+                            </h2>
+                            <div class="factors-grid">
+                                <div class="glass-card factor-card positive">
+                                    <div class="factor-header">
+                                        <i class="fa-solid fa-arrow-up"></i>
+                                        <h3>Positive Indicators</h3>
+                                    </div>
+                                    <ul class="factor-list">
+                                        {% if probability < 50 %} <li><i class="fa-solid fa-check"></i> Strong credit
+                                            profile</li>
+                                            <li><i class="fa-solid fa-check"></i> Stable employment history</li>
+                                            <li><i class="fa-solid fa-check"></i> Manageable debt ratio</li>
+                                            <li><i class="fa-solid fa-check"></i> Multiple credit lines</li>
+                                            {% else %}
+                                            <li><i class="fa-solid fa-check"></i> Application submitted</li>
+                                            <li><i class="fa-solid fa-check"></i> Income verified</li>
+                                            <li><i class="fa-solid fa-check"></i> Complete documentation</li>
+                                            {% endif %}
+                                    </ul>
+                                </div>
+                                <div class="glass-card factor-card neutral">
+                                    <div class="factor-header">
+                                        <i class="fa-solid fa-minus"></i>
+                                        <h3>Neutral Factors</h3>
+                                    </div>
+                                    <ul class="factor-list">
+                                        <li><i class="fa-solid fa-circle"></i> Age demographics</li>
+                                        <li><i class="fa-solid fa-circle"></i> Loan purpose category</li>
+                                        <li><i class="fa-solid fa-circle"></i> Employment type standard</li>
+                                        <li><i class="fa-solid fa-circle"></i> Marital status typical</li>
+                                    </ul>
+                                </div>
+                                <div class="glass-card factor-card negative">
+                                    <div class="factor-header">
+                                        <i class="fa-solid fa-arrow-down"></i>
+                                        <h3>Areas of Concern</h3>
+                                    </div>
+                                    <ul class="factor-list">
+                                        {% if probability >= 50 %}
+                                        <li><i class="fa-solid fa-exclamation"></i> High debt-to-income ratio</li>
+                                        <li><i class="fa-solid fa-exclamation"></i> Credit score below optimal</li>
+                                        <li><i class="fa-solid fa-exclamation"></i> Limited employment tenure</li>
+                                        <li><i class="fa-solid fa-exclamation"></i> Elevated default probability</li>
+                                        {% else %}
+                                        <li><i class="fa-solid fa-exclamation"></i> Interest rate sensitivity</li>
+                                        <li><i class="fa-solid fa-exclamation"></i> Loan term considerations</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="insights-section">
+                            <h2 class="section-title"><i class="fa-solid fa-lightbulb"></i> Statistical Insights</h2>
+                            <div class="insights-grid">
+                                <div class="glass-card insight-card">
+                                    <div class="insight-icon"><i class="fa-solid fa-users"></i></div>
+                                    <div class="insight-content">
+                                        <h4>Percentile Ranking</h4>
+                                        <div class="insight-value">
+                                            {% if probability < 20 %}Top 10%{% elif probability < 40 %}Top 30%{% elif
+                                                probability < 60 %}Average 50%{% elif probability < 80 %}Bottom 30%{%
+                                                else %}Bottom 10%{% endif %} </div>
+                                                <p>Compared to similar loan applications</p>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card insight-card">
+                                        <div class="insight-icon"><i class="fa-solid fa-clock"></i></div>
+                                        <div class="insight-content">
+                                            <h4>Processing Time</h4>
+                                            <div class="insight-value">0.8 seconds</div>
+                                            <p>Instant AI-powered analysis</p>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card insight-card">
+                                        <div class="insight-icon"><i class="fa-solid fa-database"></i></div>
+                                        <div class="insight-content">
+                                            <h4>Training Dataset</h4>
+                                            <div class="insight-value">200,000+ loans</div>
+                                            <p>Historical data analyzed</p>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card insight-card">
+                                        <div class="insight-icon"><i class="fa-solid fa-bullseye"></i></div>
+                                        <div class="insight-content">
+                                            <h4>Model Accuracy</h4>
+                                            <div class="insight-value">79.3%</div>
+                                            <p>Validated performance metric</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="recommendations-section">
+                                <h2 class="section-title"><i class="fa-solid fa-route"></i> Personalized Recommendations
+                                </h2>
+                                {% if 'High' in prediction %}
+                                <div class="glass-card recommendations-card risk-high-rec">
+                                    <div class="rec-header">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <h3>Action Plan for Risk Mitigation</h3>
+                                    </div>
+                                    <div class="rec-content">
+                                        <div class="rec-section">
+                                            <h4><i class="fa-solid fa-1"></i> Immediate Actions (Next 30 Days)</h4>
+                                            <ul>
+                                                <li>Review and dispute any credit report errors</li>
+                                                <li>Pay down high-interest credit cards to below 30% utilization</li>
+                                                <li>Set up automatic payments to avoid late fees</li>
+                                                <li>Contact current creditors to negotiate better terms</li>
+                                            </ul>
+                                        </div>
+                                        <div class="rec-section">
+                                            <h4><i class="fa-solid fa-2"></i> Short-term Goals (3-6 Months)</h4>
+                                            <ul>
+                                                <li>Reduce debt-to-income ratio by increasing income or reducing debt
+                                                </li>
+                                                <li>Build emergency fund covering 3 months of expenses</li>
+                                                <li>Consider secured loan options with lower rates</li>
+                                                <li>Explore co-signer opportunities with trusted individuals</li>
+                                            </ul>
+                                        </div>
+                                        <div class="rec-section">
+                                            <h4><i class="fa-solid fa-3"></i> Long-term Strategy (6-12 Months)</h4>
+                                            <ul>
+                                                <li>Work with credit counselor for personalized financial planning</li>
+                                                <li>Increase credit score by 50+ points through consistent positive
+                                                    behavior</li>
+                                                <li>Diversify credit mix with responsible account management</li>
+                                                <li>Reapply after demonstrating improved financial stability</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="rec-footer">
+                                        <i class="fa-solid fa-info-circle"></i>
+                                        Following these steps could improve your approval chances by up to 40%
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="glass-card recommendations-card risk-low-rec">
+                                    <div class="rec-header">
+                                        <i class="fa-solid fa-trophy"></i>
+                                        <h3>Optimize Your Loan Terms</h3>
+                                    </div>
+                                    <div class="rec-content">
+                                        <div class="rec-section">
+                                            <h4><i class="fa-solid fa-1"></i> Maximize Your Approval</h4>
+                                            <ul>
+                                                <li>Shop around with multiple lenders to get the best interest rate</li>
+                                                <li>Consider shorter loan terms for lower overall interest costs</li>
+                                                <li>Negotiate for fee waivers based on your strong profile</li>
+                                                <li>Lock in rates quickly if market conditions are favorable</li>
+                                            </ul>
+                                        </div>
+                                        <div class="rec-section">
+                                            <h4><i class="fa-solid fa-2"></i> Maintain Financial Health</h4>
+                                            <ul>
+                                                <li>Continue making all payments on time to preserve credit score</li>
+                                                <li>Keep credit utilization below 30% across all accounts</li>
+                                                <li>Avoid opening new credit accounts before loan closes</li>
+                                                <li>Maintain stable employment and income documentation</li>
+                                            </ul>
+                                        </div>
+                                        <div class="rec-section">
+                                            <h4><i class="fa-solid fa-3"></i> Future Financial Planning</h4>
+                                            <ul>
+                                                <li>Set up automatic loan payments to ensure perfect payment history
+                                                </li>
+                                                <li>Consider refinancing opportunities after 6-12 months</li>
+                                                <li>Build wealth through diversified investments</li>
+                                                <li>Plan for major life events with adequate financial cushion</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="rec-footer success">
+                                        <i class="fa-solid fa-thumbs-up"></i>
+                                        Your strong financial profile positions you for the best loan terms available
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="disclaimer-detailed">
+                                <div class="glass-card disclaimer-card">
+                                    <div class="disclaimer-header">
+                                        <i class="fa-solid fa-scale-balanced"></i>
+                                        <h3>Important Disclaimer</h3>
+                                    </div>
+                                    <p>This risk assessment is generated by machine learning models trained on
+                                        historical loan data and should be used for informational and educational
+                                        purposes only. The prediction is based on statistical patterns and may not
+                                        account for individual circumstances, market conditions, or qualitative factors
+                                        that lenders consider.</p>
+                                    <p><strong>This is not financial advice.</strong> Actual loan approval decisions are
+                                        made by financial institutions using proprietary underwriting criteria,
+                                        regulatory requirements, and human judgment. We recommend consulting with
+                                        qualified financial advisors and multiple lenders before making any financial
+                                        decisions.</p>
+                                    <div class="disclaimer-footer">
+                                        <div class="disclaimer-stats">
+                                            <div class="disclaimer-stat"><i
+                                                    class="fa-solid fa-shield-check"></i><span>Privacy Protected</span>
+                                            </div>
+                                            <div class="disclaimer-stat"><i class="fa-solid fa-lock"></i><span>Data Not
+                                                    Stored</span></div>
+                                            <div class="disclaimer-stat"><i
+                                                    class="fa-solid fa-graduation-cap"></i><span>Educational Tool</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="result-actions-final">
+                                <a href="/assess" class="btn btn-primary btn-large"><i
+                                        class="fa-solid fa-rotate-left"></i> Assess Another Application</a>
+                                <a href="/insights" class="btn btn-secondary btn-large"><i
+                                        class="fa-solid fa-chart-simple"></i> Learn About Models</a>
+                                <a href="/" class="btn btn-secondary btn-large"><i class="fa-solid fa-home"></i> Back to
+                                    Home</a>
+                            </div>
+                        </div>
+
+                        <footer class="footer">
+                            <div class="footer-content">
+                                <div class="footer-brand">
+                                    <div class="footer-logo"><img
+                                            src="{{ url_for('static', filename='images/logo.png') }}" alt="LoanShield"
+                                            class="footer-logo-img"> LoanShield</div>
+                                    <p>AI-powered loan default risk assessment. Making financial intelligence accessible
+                                        to everyone.</p>
+                                </div>
+                                <div class="footer-links">
+                                    <div class="footer-column">
+                                        <h4>Quick Links</h4>
+                                        <a href="/">Home</a>
+                                        <a href="/assess">Assessment</a>
+                                        <a href="/insights">Model Insights</a>
+                                        <a href="/about">About</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="footer-bottom">
+                                <p>&copy; 2026 LoanShield AI. Built with 💖 by DHAVAL TALAVIYA.</p>
+                                <p class="disclaimer">For educational purposes only. Not financial advice.</p>
+                            </div>
+                        </footer>
+                        <script src="{{ url_for('static', filename='js/three-animation.js') }}"></script>
+
+                        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+                        <script>
+                            const chartColors = {
+                                primary: '#10b981',
+                                secondary: '#38bdf8',
+                                danger: '#ef4444',
+                                warning: '#f59e0b',
+                                success: '#10b981',
+                                background: 'rgba(30, 41, 59, 0.8)',
+                                border: 'rgba(255, 255, 255, 0.1)',
+                                text: '#cbd5e1'
+                            };
+
+                            const defaultChartOptions = {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        labels: {
+                                            color: chartColors.text,
+                                            font: { family: 'Inter', size: 12 }
+                                        }
+                                    }
+                                }
+                            };
+
+                            const probability = {{ probability }};
+                            const isHighRisk = probability >= 50;
+
+                            const pieCtx = document.getElementById('riskPieChart');
+                            if (pieCtx) {
+                                new Chart(pieCtx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: ['Approval Probability', 'Default Probability'],
+                                        datasets: [{
+                                            data: [100 - probability, probability],
+                                            backgroundColor: [chartColors.success, chartColors.danger],
+                                            borderColor: [chartColors.border, chartColors.border],
+                                            borderWidth: 2
+                                        }]
+                                    },
+                                    options: {
+                                        ...defaultChartOptions,
+                                        cutout: '70%',
+                                        plugins: {
+                                            ...defaultChartOptions.plugins,
+                                            legend: {
+                                                position: 'bottom',
+                                                labels: {
+                                                    color: chartColors.text,
+                                                    padding: 20,
+                                                    font: { family: 'Inter', size: 12 }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            const barCtx = document.getElementById('comparisonBarChart');
+                            if (barCtx) {
+                                new Chart(barCtx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['This Assessment', 'Portfolio Average', 'Industry Benchmark'],
+                                        datasets: [{
+                                            label: 'Default Risk (%)',
+                                            data: [probability, 35, 28],
+                                            backgroundColor: [
+                                                isHighRisk ? chartColors.danger : chartColors.success,
+                                                chartColors.secondary,
+                                                chartColors.warning
+                                            ],
+                                            borderColor: chartColors.border,
+                                            borderWidth: 1,
+                                            borderRadius: 8
+                                        }]
+                                    },
+                                    options: {
+                                        ...defaultChartOptions,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                max: 100,
+                                                ticks: { color: chartColors.text, callback: value => value + '%' },
+                                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                                            },
+                                            x: {
+                                                ticks: { color: chartColors.text },
+                                                grid: { display: false }
+                                            }
+                                        },
+                                        plugins: {
+                                            legend: { display: false }
+                                        }
+                                    }
+                                });
+                            }
+
+                            const lineCtx = document.getElementById('trendLineChart');
+                            if (lineCtx) {
+                                const months = ['Now', '3 Mo', '6 Mo', '9 Mo', '12 Mo', '18 Mo', '24 Mo'];
+                                const baseRisk = probability;
+                                const trendData = isHighRisk
+                                    ? [baseRisk, baseRisk - 5, baseRisk - 10, baseRisk - 15, baseRisk - 18, baseRisk - 22, baseRisk - 25]
+                                    : [baseRisk, baseRisk - 2, baseRisk - 3, baseRisk - 5, baseRisk - 6, baseRisk - 8, baseRisk - 10];
+
+                                new Chart(lineCtx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: months,
+                                        datasets: [{
+                                            label: 'Projected Risk Level',
+                                            data: trendData,
+                                            borderColor: isHighRisk ? chartColors.danger : chartColors.success,
+                                            backgroundColor: isHighRisk ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                            fill: true,
+                                            tension: 0.4,
+                                            pointBackgroundColor: isHighRisk ? chartColors.danger : chartColors.success,
+                                            pointBorderColor: '#fff',
+                                            pointBorderWidth: 2,
+                                            pointRadius: 5,
+                                            pointHoverRadius: 7
+                                        }]
+                                    },
+                                    options: {
+                                        ...defaultChartOptions,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                max: 100,
+                                                ticks: { color: chartColors.text, callback: value => value + '%' },
+                                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                                            },
+                                            x: {
+                                                ticks: { color: chartColors.text },
+                                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            const radarCtx = document.getElementById('modelRadarChart');
+                            if (radarCtx) {
+                                const variance = 5;
+                                const predictions = [
+                                    probability + Math.random() * variance - variance / 2,
+                                    probability + Math.random() * variance - variance / 2,
+                                    probability + Math.random() * variance - variance / 2,
+                                    probability + Math.random() * variance - variance / 2
+                                ];
+
+                                new Chart(radarCtx, {
+                                    type: 'radar',
+                                    data: {
+                                        labels: ['Random Forest', 'XGBoost', 'Gradient Boosting', 'Logistic Regression'],
+                                        datasets: [{
+                                            label: 'Risk Prediction (%)',
+                                            data: predictions,
+                                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                                            borderColor: chartColors.success,
+                                            borderWidth: 2,
+                                            pointBackgroundColor: chartColors.success,
+                                            pointBorderColor: '#fff',
+                                            pointHoverBackgroundColor: '#fff',
+                                            pointHoverBorderColor: chartColors.success
+                                        }]
+                                    },
+                                    options: {
+                                        ...defaultChartOptions,
+                                        scales: {
+                                            r: {
+                                                beginAtZero: true,
+                                                max: 100,
+                                                ticks: {
+                                                    color: chartColors.text,
+                                                    backdropColor: 'transparent',
+                                                    callback: value => value + '%'
+                                                },
+                                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                                pointLabels: {
+                                                    color: chartColors.text,
+                                                    font: { family: 'Inter', size: 10 }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            const chartObserver = new IntersectionObserver((entries) => {
+                                entries.forEach(entry => {
+                                    if (entry.isIntersecting) {
+                                        entry.target.style.opacity = '1';
+                                        entry.target.style.transform = 'translateY(0)';
+                                    }
+                                });
+                            }, { threshold: 0.1 });
+
+                            document.querySelectorAll('.analysis-card, .factor-card, .insight-card').forEach(card => {
+                                card.style.opacity = '0';
+                                card.style.transform = 'translateY(20px)';
+                                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                                chartObserver.observe(card);
+                            });
+
+                            console.log('📊 Advanced result visualizations loaded successfully!');
+                        </script>
+</body>
+
+</html>

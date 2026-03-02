@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoanShield | AI-Powered Loan Risk Assessment</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Three.js for 3D Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body class="preload">
+    <!-- 3D Canvas Background -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Floating Icons Background -->
+    <div class="floating-icons"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="LoanShield Logo"
+                    class="nav-logo-img"> LoanShield <span>AI</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="active">Home</a>
+                <a href="/assess">Assessment</a>
+                <a href="/insights">Insights</a>
+                <a href="/about">About</a>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Know Your Risk. <br>Own Your Future.</h1>
+            <p class="hero-subtitle">Get instant loan default risk assessment powered by advanced machine learning.
+                Analyze 18 financial metrics in under 2 minutes.</p>
+
+            <div class="hero-buttons">
+                <a href="/assess" class="btn btn-primary">
+                    Start Free Assessment
+                </a>
+                <a href="/insights" class="btn btn-secondary">
+                    How It Works
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-value">~79%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">200K+</div>
+                    <div class="stat-label">Training Records</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">ML Models</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features">
+        <div class="section-header">
+            <span class="section-badge">Features</span>
+            <h2>Why LoanShield?</h2>
+            <p>Comprehensive loan risk assessment with explainable AI</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h3>Ensemble AI Model</h3>
+                <p>Combines Random Forest, XGBoost, Gradient Boosting & Logistic Regression for maximum accuracy.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h3>Explainable Results</h3>
+                <p>SHAP-powered explanations show exactly which factors contribute to your risk assessment.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <h3>What-If Scenarios</h3>
+                <p>See how changes in income, credit score, or DTI ratio could reduce your default risk.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3>Privacy First</h3>
+                <p>No data storage. Your financial information is processed instantly and never saved.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </div>
+                <h3>Mobile Optimized</h3>
+                <p>Fully responsive design works perfectly on any device - phone, tablet, or desktop.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h3>Instant Results</h3>
+                <p>Get your comprehensive risk assessment in under 2 minutes with detailed insights.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section section-dark" id="process">
+        <div class="section-header">
+            <span class="section-badge">Process</span>
+            <h2>How It Works</h2>
+            <p>Three simple steps to understand your loan risk</p>
+        </div>
+
+        <div class="process-steps">
+            <div class="process-step">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h3>Enter Your Data</h3>
+                    <p>Input 18 financial metrics including income, credit score, DTI ratio, and loan details.</p>
+                    <div class="step-icon">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h3>AI Analysis</h3>
+                    <p>Our ensemble of 4 machine learning models analyzes your data using patterns from 50,000+ records.
+                    </p>
+                    <div class="step-icon">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h3>Get Insights</h3>
+                    <p>Receive your risk score, contributing factors, and personalized suggestions for improvement.</p>
+                    <div class="step-icon">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Points Section -->
+    <section class="section" id="datapoints">
+        <div class="section-header">
+            <span class="section-badge">Data Points</span>
+            <h2>What We Analyze</h2>
+            <p>18 key financial indicators that matter</p>
+        </div>
+
+        <div class="datapoints-container">
+            <div class="datapoint-badge">Age</div>
+            <div class="datapoint-badge">Income</div>
+            <div class="datapoint-badge">Loan Amount</div>
+            <div class="datapoint-badge">Credit Score</div>
+            <div class="datapoint-badge">Employment Type</div>
+            <div class="datapoint-badge">Months Employed</div>
+            <div class="datapoint-badge">Education</div>
+            <div class="datapoint-badge">Marital Status</div>
+            <div class="datapoint-badge">Dependents</div>
+            <div class="datapoint-badge">Mortgage</div>
+            <div class="datapoint-badge">Credit Lines</div>
+            <div class="datapoint-badge">Interest Rate</div>
+            <div class="datapoint-badge">Loan Term</div>
+            <div class="datapoint-badge">DTI Ratio</div>
+            <div class="datapoint-badge">Loan Purpose</div>
+            <div class="datapoint-badge">Co-Signer</div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta-section">
+        <div class="cta-content">
+            <h2>Ready to Check Your Loan Risk?</h2>
+            <p>Get your free loan default risk assessment in under 2 minutes. No signup required.</p>
+            <a href="/assess" class="btn btn-primary btn-large">
+                Start Assessment Now
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="LoanShield"
+                        class="footer-logo-img"> LoanShield
+                </div>
+                <p>AI-powered loan default risk assessment. Making financial intelligence accessible to everyone.</p>
+                <div class="social-links">
+                    <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <a href="/">Home</a>
+                    <a href="/assess">Assessment</a>
+                    <a href="/insights">Model Insights</a>
+                    <a href="/about">About</a>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="https://github.com" target="_blank">GitHub Repo</a>
+                    <a href="/insights">How It Works</a>
+                    <a href="/about">About Us</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 LoanShield AI. Built with 💖 by DHAVAL TALAVIYA</p>
+            <p class="disclaimer">For educational purposes only. Not financial advice.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/three-animation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
